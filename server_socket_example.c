@@ -14,14 +14,14 @@ int main(){
 
     server_sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
     server_address.sun_family = AF_UNIX;
-    strcopy(server_address.sun_path, "server_socket");
+    strcpy(server_address.sun_path, "server_socket");
     server_len = sizeof(server_address);
     bind(server_sockfd, (struct sockaddr *)&server_address, server_len);
     listen(server_sockfd, 5);
     while(1){
         printf("Server waiting\n");
-        client_len = sizeof(client_address);
-        client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, client_len);
+        client_len = sizeof(struct sockaddr_un);
+        client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_len);
         read(client_sockfd, &ch, 1);
         ch++;
         write(client_sockfd, &ch, 1);

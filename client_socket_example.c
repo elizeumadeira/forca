@@ -9,17 +9,18 @@
 int main(){
     int sockfd;
     int len;
+    int result;
     struct sockaddr_un address;
     char ch = 'A';
 
     sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
     address.sun_family = AF_UNIX;
-    strcopy(address.sun_path, "server_socket");
+    strcpy(address.sun_path, "server_socket");
     len = sizeof(address);
     result = connect(sockfd, (struct sockaddr *)&address, len);
     if(result == -1){
         perror("oops: client1");
-        exit[1];
+        exit(1);
     }
     write(sockfd, &ch, 1);
     read(sockfd, &ch, 1);

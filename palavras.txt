@@ -1,0 +1,6 @@
+computacao
+distribuida
+sistemas
+informacao
+linguagem
+paradigma

@@ -48,7 +48,7 @@ int get_file_line_number(){
 	return line_number;
 }
 
-char* get_palavra(char * palavra_escolhida) {
+void get_palavra(char * palavra_escolhida) {
 	int line_number = 0;
 	int random_number = 0;
 
@@ -56,69 +56,29 @@ char* get_palavra(char * palavra_escolhida) {
 	srand((unsigned)time(NULL));
 	random_number = rand() % total_line_number;
 
-	printf("Numero sorteado: %d\n\n", random_number);
+	// printf("Numero sorteado: %d\n\n", random_number);
 
-	// i = NUMBER_OF_STRING;
-	// random_number = 0;
-	// srand((unsigned)time(NULL));
-	// k = rand() % i;
-	// return palavras[k];
+	FILE* filePointer;
+	int bufferLength = 255;
+	char buffer[bufferLength];
 
-	FILE * fp;
-    char * line = NULL;
-    size_t len = 0;
-    ssize_t read;
+	filePointer = fopen("palavras.txt", "r");
 
-    fp = fopen("./palavras.txt", "r");
-    if (fp == NULL)
-        exit(EXIT_FAILURE);
+	while(fgets(buffer, bufferLength, filePointer)) {
+		// printf("%s\n", buffer);
 
-    while ((read = getline(&line, &len, fp)) != -1) {
-        printf("Retrieved line of length %zu:\n", read);
-        printf("%s", line);
+		// remover quebra de linha no final da palavra
+		int len = strlen(buffer);
+		if (len > 0 && buffer[len-1] == '\n') buffer[len-1] = '\0';
 
 		if(line_number == random_number){
-			strcat(palavra_escolhida, line);
+			strcat(palavra_escolhida, buffer);
 		}
 
 		line_number++;
-    }
-
-	fclose(fp);
-    if (line){
-		free(line);
 	}
 
-	return palavra_escolhida;
-
-
-
-	// printf("ESCOLHA aleatorio %d %s\n", random_number, lista_palavras[random_number]);
-
-	// size_t i = 0;
-	// for( i = 0; i < sizeof(lista_palavras) / sizeof(lista_palavras[10]); i++){
-	// 	printf("ESCOLHA aleatorio %s\n", lista_palavras[i]);
-	// }
-
-
-	// line_number = 0;
-	// char * palavra_escolhida = NULL;
-	// while ((read = getline(&line, &len, fp)) != -1) {
-    //     // printf("Retrieved line of length %zu:\n", read);
-    //     // printf("%s", line);
-
-	// 	if(random_number == line_number){
-	// 		printf(" palavra_escolhida %s\n", line);
-	// 		palavra_escolhida = line;
-	// 		break;
-	// 	}
-
-	// 	line_number++;
-    // }
-
-   
-
-	// return lista_palavras[random_number];
+	fclose(filePointer);
 }
 
 char* tentativas = "";
@@ -200,115 +160,116 @@ int is_letra_in_palavra(char letra, const char *palavra){
 	int exists = 0;
 	for(i = 0; i < ate; i++){
 		if(palavra[i] == letra){
-			exists = 1;
+			exists++;
 		}
 	}
-		printf( "%d \n", exists);
+
+	printf( "%d \n", exists);
 	return exists;
 }
 
 int main()
 {
-	char word[30]; 
-	get_palavra(word);
-	printf(" Palavra Escolhida: %s \n", word);
-
-	printf(" Finalizando \n");
-	return 0;
 	
-	// // inicia as variaveis relativas ao socket
-	// int server_sockfd, client_sockfd;
-	// int bind_return;
-    // int server_len, client_len;
-    // struct sockaddr_un server_address;
-    // struct sockaddr_un client_address;
-    // char ch;
+	// printf(" Palavra Escolhida: %s \n", word);
+
+	// printf(" Finalizando \n");
+	// return 0;
 	
-	// // configura socket
-	// server_sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
-    // server_address.sun_family = AF_UNIX;
-    // strcpy(server_address.sun_path, "server_socket18");
-    // server_len = sizeof(server_address);
-    // bind_return = bind(server_sockfd, (struct sockaddr *)&server_address, server_len);
+	// inicia as variaveis relativas ao socket
+	int server_sockfd, client_sockfd;
+	int bind_return;
+    int server_len, client_len;
+    struct sockaddr_un server_address;
+    struct sockaddr_un client_address;
+    char ch;
 	
-	// if(bind_return == -1){
-	// 	printf(" erro bind No: %d %d \n", errno, server_sockfd);
-	// 	return 0;
-	// }
+	// configura socket
+	server_sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
+    server_address.sun_family = AF_UNIX;
+	remove("server_socket");
+    strcpy(server_address.sun_path, "server_socket");
+    server_len = sizeof(server_address);
+    bind_return = bind(server_sockfd, (struct sockaddr *)&server_address, server_len);
+	
+	if(bind_return == -1){
+		printf(" erro bind No: %d %d \n", errno, server_sockfd);
+		return 0;
+	}
 
-    // listen(server_sockfd, 5);
+    listen(server_sockfd, 5);
 
-	// // inicia as variaveis referentes a regra de negócio do sistema
-	// const char* palavra = get_palavra();
-	// int palavra_length = strlen(palavra);
-	// char acertos [palavra_length];
-	// char erros [palavra_length];
-	// strcpy(acertos, palavra); 
+	// inicia as variaveis referentes a regra de negócio do sistema
+	char palavra[30] = ""; 
+	get_palavra(palavra);
+	int palavra_length = strlen(palavra);
+	char acertos [palavra_length];
+	char erros [palavra_length];
+	strcpy(acertos, palavra); 
 
-	// // preenche os caracteres do array de acertos com _
-	// for(int i = 0; i < strlen(acertos); i++){
-	// 	acertos[i] = '_';
-	// 	erros[i] = '_';
-	// }
+	printf("%s - %d", palavra, palavra_length);
 
-	// while(
-	// 	// usuario nao extrapolou numero de tentativas
-	// 	n_tentativas < MAX_TENTATIVAS &&
-	// 	// usuario ainda nao acertou todas as letras
-	// 	n_acertos < palavra_length
-	// 	// 1
-	// ){
-	// 	char boneco[1000] = "";
+	// preenche os caracteres do array de acertos com _
+	for(int i = 0; i < strlen(acertos); i++){
+		acertos[i] = '_';
+		erros[i] = '_';
+	}
 
-	// 	sprintf(boneco, " Você possui %d tentativas \n", MAX_TENTATIVAS - n_tentativas);
+	while(
+		// usuario nao extrapolou numero de tentativas
+		(n_tentativas < MAX_TENTATIVAS) == 1 &&
+		// usuario ainda nao acertou todas as letras
+		(n_acertos < palavra_length) == 1
+		// 1
+	){
+		char boneco[1000] = "";
 
-	// 	printf("Server waiting\n");
-    //     client_len = sizeof(struct sockaddr_un);
-    //     client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_len);
-    //     read(client_sockfd, &ch, 1);
+		sprintf(boneco, " Você possui %d tentativas \n", MAX_TENTATIVAS - n_tentativas);
 
-	// 	if(is_letra_in_palavra(ch, palavra) == 1){
-	// 		strcat(boneco, "Voce acertou!! \n");
-	// 		atualiza_acertos(acertos, ch, palavra);
-	// 		n_acertos++;
-	// 	}else{
-	// 		strcat(boneco, "Voce errou... \n");
-	// 		erros[n_tentativas] = ch;	
-	// 		n_tentativas++;
-	// 	}
+		printf("Server waiting\n");
+        client_len = sizeof(struct sockaddr_un);
+        client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_len);
+        read(client_sockfd, &ch, 1);
 
-	// 	desenha_boneco(boneco, n_tentativas);
+		int qtd_acertos_vez = is_letra_in_palavra(ch, palavra);
+		if(qtd_acertos_vez > 0){
+			strcat(boneco, "Voce acertou!! \n");
+			atualiza_acertos(acertos, ch, palavra);
+			n_acertos = n_acertos + qtd_acertos_vez;
+		}else{
+			strcat(boneco, "Voce errou... \n");
+			erros[n_tentativas] = ch;	
+			n_tentativas++;
+		}
 
-	// 	strcat(boneco, "Acertos: ");
-	// 	strcat(boneco, acertos);
-	// 	strcat(boneco, "\n");
+		desenha_boneco(boneco, n_tentativas);
 
-	// 	strcat(boneco, "Erros: ");
-	// 	strcat(boneco, erros);
-	// 	strcat(boneco, "\n");
+		strcat(boneco, "Acertos: ");
+		strcat(boneco, acertos);
+		strcat(boneco, "\n");
 
-	// 	// char buffer_acerto[900];
-	// 	// sprintf(buffer_acerto, "n_acertos: %d\n", n_acertos);
-	// 	// strcat(boneco, buffer_acerto);
-	// 	// char buffer_tentativa[950];
-	// 	// sprintf(buffer_tentativa, "n_tentativas: %d\n", n_tentativas);
-	// 	// strcat(boneco, buffer_tentativa);
+		strcat(boneco, "Erros: ");
+		strcat(boneco, erros);
+		strcat(boneco, "\n");
 
-	// 	write(client_sockfd, &boneco, 1000);
-    //     close(client_sockfd);
-	// }
+		printf("n_acertos: %d\n", n_acertos);
+		printf("palavra_length: %d\n", palavra_length);
 
-	// char mensagem_final[] = "* ";
-	// if(n_acertos == palavra_length){
-	// 	strcat(mensagem_final, "PARABENS! Você escapou da forca \n");
-	// }else{
-	// 	strcat(mensagem_final, "GAME OVER! Mais sorte na próxima tentativa! \n");
-	// }
+		write(client_sockfd, &boneco, 1000);
+        close(client_sockfd);
+	}
 
-	// client_len = sizeof(struct sockaddr_un);
-    // client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_len);
-	// write(client_sockfd, &mensagem_final, 1000);
-    // close(client_sockfd);
+	char mensagem_final[] = "* ";
+	if(n_acertos == palavra_length){
+		strcat(mensagem_final, "PARABENS! Você escapou da forca \n");
+	}else{
+		strcat(mensagem_final, "GAME OVER! Mais sorte na próxima tentativa! \n");
+	}
 
-    // return 0;
+	client_len = sizeof(struct sockaddr_un);
+    client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_len);
+	write(client_sockfd, &mensagem_final, 1000);
+    close(client_sockfd);
+
+    return 0;
 }
